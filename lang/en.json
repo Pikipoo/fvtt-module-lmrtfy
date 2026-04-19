@@ -77,5 +77,8 @@
     "LMRTFY.DemonLordAdditionalModifier": "Additional modifier:",
     "LMRTFY.DemonLordFateRoll": "Fate Roll",    
     "LMRTFY.DemonLordNoCombat": "You are not in combat!",
-    "LMRTFY.DemonLordNoBoonsBanes": "No Boons/Banes"
+    "LMRTFY.DemonLordNoBoonsBanes": "No Boons/Banes",
+    "LMRTFY.WFRP4eDifficulty": "Difficulty:",
+    "LMRTFY.WFRP4eSLBonus": "SL Bonus:",
+    "LMRTFY.WFRP4eCharacteristics": "Characteristics:"
 }

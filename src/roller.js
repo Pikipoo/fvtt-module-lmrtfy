@@ -23,6 +23,11 @@ class LMRTFYRoller extends Application {
             this.additionalModifier = data.additionalModifier;
         }
 
+        if (game.system.id === 'wfrp4e') {
+            this.difficulty = data.difficulty;
+            this.slBonus = data.slBonus;
+        }
+
         if (data.title) {
             this.options.title = data.title;
         }
@@ -160,8 +165,12 @@ class LMRTFYRoller extends Application {
                 game.i18n.localize(skillA).localeCompare(skillB)
             })
             .forEach(s => {
-                const skill = (LMRTFY.skills[s]?.label) ? LMRTFY.skills[s].label : LMRTFY.skills[s];
-                skills[s] = skill;
+                if (game.system.id === 'wfrp4e') {
+                    skills[s] = s;
+                } else {
+                    const skill = (LMRTFY.skills[s]?.label) ? LMRTFY.skills[s].label : LMRTFY.skills[s];
+                    skills[s] = skill;
+                }
             });
 
         const data = {
@@ -360,8 +369,20 @@ class LMRTFYRoller extends Application {
                       case 2:
                         await actor[rollMethod].call(actor, ...args, options);
                         break;
-                    }			
+                    }
 					break;
+                }
+
+                case "wfrp4e": {
+                    const key = args[0];
+                    await actor[rollMethod].call(actor, key, {
+                        fields: {
+                            difficulty: this.difficulty || "challenging",
+                            slBonus: this.slBonus || 0
+                        },
+                        skipTargets: true
+                    });
+                    break;
                 }
 
                 default: {

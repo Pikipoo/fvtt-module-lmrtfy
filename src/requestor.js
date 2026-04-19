@@ -32,7 +32,10 @@ class LMRTFYRequestor extends FormApplication {
                 break;
             case "demonlord":
                 template = "modules/lmrtfy/templates/demonlord-request-rolls.html";
-                break;                
+                break;
+            case "wfrp4e":
+                template = "modules/lmrtfy/templates/wfrp4e-request-rolls.html";
+                break;
             default:
                 template = "modules/lmrtfy/templates/request-rolls.html";
                 break;
@@ -62,17 +65,38 @@ class LMRTFYRequestor extends FormApplication {
         const saves = LMRTFY.saves;
         const abilityModifiers = LMRTFY.abilityModifiers;
 
-        const skills = Object.keys(LMRTFY.skills)
-            .sort((a, b) => {
-                const skillA = (LMRTFY.skills[a]?.label) ? LMRTFY.skills[a].label : LMRTFY.skills[a];
-                const skillB = (LMRTFY.skills[b]?.label) ? LMRTFY.skills[b].label : LMRTFY.skills[b];
-                game.i18n.localize(skillA).localeCompare(skillB)
-            })
-            .reduce((acc, skillKey) => {
-                const skill = (LMRTFY.skills[skillKey]?.label) ? LMRTFY.skills[skillKey]?.label : LMRTFY.skills[skillKey];
-                acc[skillKey] = skill;
+        let skills;
+        if (game.system.id === 'wfrp4e') {
+            const skillNames = new Set();
+            for (const actor of actors) {
+                for (const item of (actor.itemTypes?.skill ?? [])) {
+                    skillNames.add(item.name);
+                }
+            }
+            skills = Array.from(skillNames).sort().reduce((acc, name) => {
+                acc[name] = name;
                 return acc;
             }, {});
+        } else {
+            skills = Object.keys(LMRTFY.skills)
+                .sort((a, b) => {
+                    const skillA = (LMRTFY.skills[a]?.label) ? LMRTFY.skills[a].label : LMRTFY.skills[a];
+                    const skillB = (LMRTFY.skills[b]?.label) ? LMRTFY.skills[b].label : LMRTFY.skills[b];
+                    game.i18n.localize(skillA).localeCompare(skillB)
+                })
+                .reduce((acc, skillKey) => {
+                    const skill = (LMRTFY.skills[skillKey]?.label) ? LMRTFY.skills[skillKey]?.label : LMRTFY.skills[skillKey];
+                    acc[skillKey] = skill;
+                    return acc;
+                }, {});
+        }
+
+        let difficultyOptions = [];
+        if (game.system.id === 'wfrp4e' && LMRTFY.wfrp4eDifficultyLabels) {
+            for (const [key, label] of Object.entries(LMRTFY.wfrp4eDifficultyLabels)) {
+                difficultyOptions.push({ key, label, selected: key === 'challenging' });
+            }
+        }
 
         let tables = null;
         if (game.tables) {
@@ -93,6 +117,7 @@ class LMRTFYRequestor extends FormApplication {
             rollModes: CONFIG.Dice.rollModes,
             showDC: (game.system.id === 'pf2e') ? true : false,
             abilityModifiers,
+            difficultyOptions,
         };
     }
 
@@ -372,6 +397,13 @@ class LMRTFYRequestor extends FormApplication {
             boonsBanes = formData.boonsBanes;
             additionalModifier = formData.additionalModifier;
         }
+
+        let difficulty = undefined;
+        let slBonus = undefined;
+        if (game.system.id === 'wfrp4e') {
+            difficulty = formData.difficulty;
+            slBonus = parseInt(formData.slBonus) || 0;
+        }
     
         const socketData = {
             user: formData.user,
@@ -396,7 +428,11 @@ class LMRTFYRequestor extends FormApplication {
         }
         if (game.system.id === 'demonlord') {
             socketData['boonsBanes'] = boonsBanes;
-            socketData['additionalModifier'] = additionalModifier;            
+            socketData['additionalModifier'] = additionalModifier;
+        }
+        if (game.system.id === 'wfrp4e') {
+            socketData['difficulty'] = difficulty;
+            socketData['slBonus'] = slBonus;
         }
         
         if (saveAsMacro) {
