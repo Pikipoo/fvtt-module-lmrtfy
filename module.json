@@ -3,7 +3,7 @@
     "name": "lmrtfy",
     "title": "Let Me Roll That For You!",
     "description": "Ask your players to make rolls for you.",
-    "version": "3.00",
+    "version": "3.2.0-rc1",
     "author": "KaKaRoTo, iotech, Limping Ninja, Rughalt, Calego, VTT Lair",
     "authors": [
         {
@@ -24,7 +24,7 @@
     "compatibility": {
         "minimum": "10",
         "verified": "10"
-    },        
+    },
     "languages": [
         {
             "lang": "en",
