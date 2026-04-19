@@ -3,7 +3,7 @@
     "name": "lmrtfy",
     "title": "Let Me Roll That For You!",
     "description": "Ask your players to make rolls for you.",
-    "version": "3.00",
+    "version": "3.2.0-rc1",
     "author": "KaKaRoTo, iotech, Limping Ninja, Rughalt, Calego, VTT Lair",
     "authors": [
         {
@@ -24,7 +24,7 @@
     "compatibility": {
         "minimum": "10",
         "verified": "10"
-    },        
+    },
     "languages": [
         {
             "lang": "en",
@@ -85,7 +85,8 @@
         "ose",
         "foundry-chromatic-dungeons",
         "degenesis",
-        "ffd20"
+        "ffd20",
+        "wfrp4e"
     ],
     "relationships": {
         "systems": [
@@ -191,6 +192,14 @@
                 "manifest": "https://raw.githubusercontent.com/foundryvtt-dcc/dcc/main/system.json",
                 "compatibility": {
                     "verified": "0.43.0"
+                }
+            },
+            {
+                "id": "wfrp4e",
+                "type": "system",
+                "manifest": "https://github.com/moo-man/WFRP4e-FoundryVTT/releases/latest/download/system.json",
+                "compatibility": {
+                    "verified": "9.5.4"
                 }
             }
         ]

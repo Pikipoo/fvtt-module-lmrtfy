@@ -278,6 +278,24 @@ class LMRTFY {
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
                 break;
 
+            case 'wfrp4e':
+                LMRTFY.saveRollMethod = '';
+                LMRTFY.abilityRollMethod = 'setupCharacteristic';
+                LMRTFY.skillRollMethod = 'setupSkill';
+                LMRTFY.abilities = CONFIG.WFRP4E.characteristics;
+                LMRTFY.skills = {};
+                LMRTFY.saves = {};
+                LMRTFY.normalRollEvent = {};
+                LMRTFY.advantageRollEvent = {};
+                LMRTFY.disadvantageRollEvent = {};
+                LMRTFY.specialRolls = { 'initiative': true, 'deathsave': false, 'perception': false };
+                LMRTFY.abilityAbbreviations = CONFIG.WFRP4E.characteristicsAbbrev;
+                LMRTFY.modIdentifier = '';
+                LMRTFY.abilityModifiers = {};
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons');
+                LMRTFY.wfrp4eDifficultyLabels = CONFIG.WFRP4E.difficultyLabels;
+                break;
+
             default:
                 console.error('LMRFTY | Unsupported system detected');
 
