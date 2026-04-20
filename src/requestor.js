@@ -58,8 +58,8 @@ class LMRTFYRequestor extends FormApplication {
 
     async getData() {
         // Return data to the template
-        const actors = game.actors.entities || game.actors.contents;
-        const users = game.users.entities || game.users.contents;
+        const actors = game.actors.contents;
+        const users = game.users.contents;
         // Note: Maybe these work better at a global level, but keeping things simple
         const abilities = LMRTFY.abilities;
         const saves = LMRTFY.saves;
@@ -166,7 +166,7 @@ class LMRTFYRequestor extends FormApplication {
             const actorId = div.dataset.id;
             const actor = game.actors.get(actorId);
             if (!actor) return;
-            const gameUsers = game.users.entities || game.users.contents;
+            const gameUsers = game.users.contents;
             const user = userId === "character" ? gameUsers.find(u => u.character && u.character.id === actor.id) : null;
             const tooltip = document.createElement("SPAN");
             tooltip.classList.add("tooltip");
@@ -178,14 +178,14 @@ class LMRTFYRequestor extends FormApplication {
     _getUserActorIds(userId) {
         let actors = [];
         if (userId === "character") {
-            const gameUsers = game.users.entities || game.users.contents;
+            const gameUsers = game.users.contents;
             actors = gameUsers.map(u => u.character?.id).filter(a => a)
         } else if (userId === "tokens") {
             actors = Array.from(new Set(canvas.tokens.controlled.map(t => t.actor.id))).filter(a => a);
         } else {
             const user = game.users.get(userId);
             if (user) {
-                const gameActors = game.actors.contents || game.actors.entities;
+                const gameActors = game.actors.contents;
                 actors = gameActors.filter(a => a.testUserPermission(user, "OWNER")).map(a => a.id)
             }
         }

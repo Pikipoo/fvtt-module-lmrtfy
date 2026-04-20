@@ -176,7 +176,7 @@ class LMRTFY {
             break;
 
             case 'demonlord':
-                const abilities = duplicate(CONFIG.DL.attributes);
+                const abilities = foundry.utils.duplicate(CONFIG.DL.attributes);
                 delete abilities.defense;
                 LMRTFY.saveRollMethod = 'rollChallenge';
                 LMRTFY.abilityRollMethod = 'rollChallenge';
@@ -326,7 +326,7 @@ class LMRTFY {
         '</svg>';
 
         // for now we don't allow can fails until midi-qol has update patching.js
-        if (game.modules.get("midi-qol")?.active && !isNewerVersion(game.modules.get("midi-qol")?.version, "10.0.26")) {
+        if (game.modules.get("midi-qol")?.active && !foundry.utils.isNewerVersion(game.modules.get("midi-qol")?.version, "10.0.26")) {
             LMRTFY.canFailChecks = false;
         }
 
@@ -413,25 +413,25 @@ class LMRTFY {
             LMRTFY.requestor.setPosition({ width: "auto", height: "auto" })
     }
 
-    static getSceneControlButtons(buttons) {
-        let tokenButton = buttons.find(b => b.name == "token")
+    static getSceneControlButtons(controls) {
+        const tokenControl = controls.tokens;
 
-        if (tokenButton) {
-            tokenButton.tools.push({
+        if (tokenControl) {
+            tokenControl.tools["request-roll"] = {
                 name: "request-roll",
                 title: game.i18n.localize('LMRTFY.ControlTitle'),
                 icon: "fas fa-dice-d20",
                 visible: game.user.isGM,
                 onClick: () => LMRTFY.requestRoll(),
                 button: true
-            });
+            };
         }
     }
 
     static buildAbilityModifier(actor, ability) {
         const modifiers = [];
 
-        const mod = game.pf2e.AbilityModifier.fromScore(ability, actor.data.data.abilities[ability].value);
+        const mod = game.pf2e.AbilityModifier.fromScore(ability, actor.system.abilities[ability].value);
         modifiers.push(mod);
 
         [`${ability}-based`, 'ability-check', 'all'].forEach((key) => {
@@ -487,4 +487,6 @@ globalThis.LMRTFYRequestRoll = LMRTFY.requestRoll;
 Hooks.once('init', LMRTFY.init);
 Hooks.on('ready', LMRTFY.ready);
 Hooks.on('getSceneControlButtons', LMRTFY.getSceneControlButtons);
+// v13 renamed this hook; keep both until confirmed
 Hooks.on('renderChatMessage', LMRTFY.hideBlind);
+Hooks.on('renderChatMessageHTML', LMRTFY.hideBlind);

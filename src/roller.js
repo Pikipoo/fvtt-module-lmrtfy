@@ -40,7 +40,7 @@ class LMRTFYRoller extends Application {
         }
 
         this.hasMidi = game.modules.get("midi-qol")?.active;
-        this.midiUseNewRoller = isNewerVersion(game.modules.get("midi-qol")?.version, "10.0.26");
+        this.midiUseNewRoller = foundry.utils.isNewerVersion(game.modules.get("midi-qol")?.version, "10.0.26");
 
         Handlebars.registerHelper('canFailAbilityChecks', function (name, ability) {
             if (LMRTFY.canFailChecks) {
@@ -99,7 +99,7 @@ class LMRTFYRoller extends Application {
     static requestAbilityChecks(actor, abilities, options={}) {
         if (!actor || !abilities) return;
         if (typeof(abilities) === "string") abilities = [abilities];
-        const data = mergeObject(options, {
+        const data = foundry.utils.mergeObject(options, {
             abilities: [],
             saves: [],
             skills: []
@@ -110,7 +110,7 @@ class LMRTFYRoller extends Application {
     static requestSkillChecks(actor, skills, options={}) {
         if (!actor || !skills) return;
         if (typeof(skills) === "string") skills = [skills];
-        const data = mergeObject(options, {
+        const data = foundry.utils.mergeObject(options, {
             abilities: [],
             saves: [],
             skills: []
@@ -121,7 +121,7 @@ class LMRTFYRoller extends Application {
     static requestSavingThrows(actor, saves, options={}) {
         if (!actor || !saves) return;
         if (typeof(saves) === "string") saves = [saves];
-        const data = mergeObject(options, {
+        const data = foundry.utils.mergeObject(options, {
             abilities: [],
             saves: [],
             skills: []
@@ -403,13 +403,13 @@ class LMRTFYRoller extends Application {
         game.settings.set("core", "rollMode", this.mode || CONST.DICE_ROLL_MODES);
 
         for (let actor of this.actors) {
-            const initiative = actor.data.data.attributes.initiative;
+            const initiative = actor.system.attributes.initiative;
             const rollNames = ['all', 'initiative'];
             if (initiative.ability === 'perception') {
                 rollNames.push('wis-based');
                 rollNames.push('perception');
             } else {
-                const skill = actor.data.data.skills[initiative.ability];
+                const skill = actor.system.skills[initiative.ability];
                 rollNames.push(`${skill.ability}-based`);
                 rollNames.push(skill.name);
             }
@@ -494,7 +494,7 @@ class LMRTFYRoller extends Application {
             );
 
             rollMessages.push(
-                mergeObject(
+                foundry.utils.mergeObject(
                     rollMessageData,
                     {
                         speaker: {
@@ -570,7 +570,7 @@ class LMRTFYRoller extends Application {
                     if ( this.mode === "selfroll" ) chatData.whisper = [game.user.id];
                     if ( this.mode === "blindroll" ) chatData.blind = true;
 
-                    setProperty(chatData, "flags.lmrtfy", {"message": this.data.message, "data": this.data.attach, "blind": chatData.blind});
+                    foundry.utils.setProperty(chatData, "flags.lmrtfy", {"message": this.data.message, "data": this.data.attach, "blind": chatData.blind});
 
                     chatMessages.push(chatData);
 
