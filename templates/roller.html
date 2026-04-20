@@ -26,49 +26,49 @@
 
     {{#each abilities as |name ability|}}
     <div>
-        {{#if (lmrtfy-isdemonlord this)}}<button type="button" class="lmrtfy-ability-check" data-ability={{ability}}>{{localize "LMRTFY.DemonLordChallengeRoll"}} {{localize name}}</button>{{else}} <button type="button" class="lmrtfy-ability-check" data-ability={{ability}}>{{localize "LMRTFY.AbilityCheck"}} {{localize name}}</button>{{/if}}
+        {{#if (lmrtfy-isdemonlord this)}}<button type="button" class="lmrtfy-ability-check" data-action="abilityCheck" data-ability={{ability}}>{{localize "LMRTFY.DemonLordChallengeRoll"}} {{localize name}}</button>{{else}} <button type="button" class="lmrtfy-ability-check" data-action="abilityCheck" data-ability={{ability}}>{{localize "LMRTFY.AbilityCheck"}} {{localize name}}</button>{{/if}}
     </div>
         {{#canFailAbilityChecks name ability}}
         {{/canFailAbilityChecks}}
     {{/each}}
     {{#each saves as |name ability|}}
     <div>
-        <button type="button" class="lmrtfy-ability-save" data-ability="{{ability}}">{{localize "LMRTFY.SavingThrow"}} {{localize name}}</button>
+        <button type="button" class="lmrtfy-ability-save" data-action="abilitySave" data-ability="{{ability}}">{{localize "LMRTFY.SavingThrow"}} {{localize name}}</button>
     </div>
         {{#canFailSaveChecks name ability}}
         {{/canFailSaveChecks}}
     {{/each}}
     {{#each skills as |name skill|}}
     <div>
-        <button type="button" class="lmrtfy-skill-check" data-skill="{{skill}}">{{localize "LMRTFY.SkillCheck"}} {{localize name}}</button>
+        <button type="button" class="lmrtfy-skill-check" data-action="skillCheck" data-skill="{{skill}}">{{localize "LMRTFY.SkillCheck"}} {{localize name}}</button>
     </div>
         {{#canFailSkillChecks name skill}}
         {{/canFailSkillChecks}}
     {{/each}}
     {{#if customFormula}}
     <div>
-        <button type="button" class="lmrtfy-custom-formula" data-formula="{{customFormula}}">{{localize "LMRTFY.CustomFormula"}} {{customFormula}}</button>
+        <button type="button" class="lmrtfy-custom-formula" data-action="customFormula" data-formula="{{customFormula}}">{{localize "LMRTFY.CustomFormula"}} {{customFormula}}</button>
     </div>
     {{/if}}
     {{#if initiative}}
     <div>
-        <button type="button" class="lmrtfy-initiative">{{localize "LMRTFY.Initiative"}}</button>
+        <button type="button" class="lmrtfy-initiative" data-action="initiative">{{localize "LMRTFY.Initiative"}}</button>
     </div>
     {{/if}}
     {{#if deathsave}}
     <div>
-        {{#if (lmrtfy-isdemonlord this)}}<button type="button" class="lmrtfy-death-save">{{localize "LMRTFY.DemonLordFateRoll"}}</button>{{else}}<button type="button" class="lmrtfy-death-save">{{localize "LMRTFY.DeathSave"}}</button>{{/if}}
+        {{#if (lmrtfy-isdemonlord this)}}<button type="button" class="lmrtfy-death-save" data-action="deathSave">{{localize "LMRTFY.DemonLordFateRoll"}}</button>{{else}}<button type="button" class="lmrtfy-death-save" data-action="deathSave">{{localize "LMRTFY.DeathSave"}}</button>{{/if}}
     </div>
     {{/if}}
     {{#if perception}}
     <div>
-        {{#if (lmrtfy-isdemonlord this)}}<button type="button" class="lmrtfy-perception">{{localize "DL.CharRolCorruption"}}{{else}}<button type="button" class="lmrtfy-perception">{{localize "LMRTFY.Perception"}}</button>{{/if}}
+        {{#if (lmrtfy-isdemonlord this)}}<button type="button" class="lmrtfy-perception" data-action="perception">{{localize "DL.CharRolCorruption"}}{{else}}<button type="button" class="lmrtfy-perception" data-action="perception">{{localize "LMRTFY.Perception"}}</button>{{/if}}
     </div>
     {{/if}}
     {{#if tables}}
     {{#each tables as |table|}}
     <div>
-        <button type="button" class="lmrtfy-roll-table" data-table="{{table}}">{{localize "LMRTFY.RollTables"}} {{table}}</button>
+        <button type="button" class="lmrtfy-roll-table" data-action="rollTable" data-table="{{table}}">{{localize "LMRTFY.RollTables"}} {{table}}</button>
     </div>
     {{/each}}
     {{/if}}    
