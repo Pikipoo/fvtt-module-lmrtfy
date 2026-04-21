@@ -1,6 +1,8 @@
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
+const MODULE_ID = "lmrtfy-reloaded";
+
+export class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
 
     constructor(actors, data) {
         super();
@@ -112,7 +114,7 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
     };
 
     static PARTS = {
-        body: { template: "modules/lmrtfy/templates/roller.html" },
+        body: { template: `modules/${MODULE_ID}/templates/roller.html` },
     };
 
     static requestAbilityChecks(actor, abilities, options={}) {

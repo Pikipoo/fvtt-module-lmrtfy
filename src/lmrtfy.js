@@ -1,3 +1,8 @@
+import { LMRTFYRequestor } from "./requestor.js";
+import { LMRTFYRoller } from "./roller.js";
+
+const MODULE_ID = "lmrtfy-reloaded";
+
 class LMRTFY {
     static async init() {
         game.settings.register('lmrtfy', 'enableParchmentTheme', {
@@ -70,7 +75,7 @@ class LMRTFY {
     }
 
     static ready() {
-        game.socket.on('module.lmrtfy', LMRTFY.onMessage);
+        game.socket.on(`module.${MODULE_ID}`, LMRTFY.onMessage);
 
         switch (game.system.id) {
             case 'dnd5eJP':
@@ -460,11 +465,11 @@ class LMRTFY {
             actors = actors.filter(a => !a.hasPlayerOwner);
         }        
         if (actors.length === 0) return;
-        new globalThis.LMRTFYRoller(actors, data).render(true);
+        new LMRTFYRoller(actors, data).render(true);
     }
     static requestRoll() {
         if (LMRTFY.requestor === undefined)
-            LMRTFY.requestor = new globalThis.LMRTFYRequestor();
+            LMRTFY.requestor = new LMRTFYRequestor();
         LMRTFY.requestor.render(true);
     }
 

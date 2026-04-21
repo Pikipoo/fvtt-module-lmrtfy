@@ -15,9 +15,7 @@
             "url": "https://github.com/Pikipoo"
         }
     ],
-    "scripts": [
-        "./src/requestor.js",
-        "./src/roller.js",
+    "esmodules": [
         "./src/lmrtfy.js"
     ],
     "styles": [
