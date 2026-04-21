@@ -261,6 +261,18 @@ Scope: full rewrite of `src/requestor.js` class header, `DEFAULT_OPTIONS`, `PART
 
 **Done when:** the GM can open the Requestor from the scene-controls button, select actors, select abilities/skills/saves, and click *Request Roll*. Socket message reaches the player's Roller (Phase-2 converted). GM can also *Save as Macro* (exercises `Macro.create` path).
 
+### Phase 3a — Fix `LMRTFY.onThemeChange` for AppV2
+
+Scope: rewrite `LMRTFY.onThemeChange` (`src/lmrtfy.js:404-414`) to work with AppV2 elements. This method is the settings callback for `LMRTFY.enableParchmentTheme` and must toggle the `lmrtfy-parchment` CSS class on all open LMRTFY application windows (both requestor and roller). Three breaking issues:
+
+| # | v10 code | Issue | v13 fix |
+|---|----------|-------|---------|
+| ① | `$(".lmrtfy.lmrtfy-requestor,.lmrtfy.lmrtfy-roller").toggleClass("lmrtfy-parchment", enabled)` | jQuery `$()` undefined in v13 — runtime crash | `document.querySelectorAll(".lmrtfy.lmrtfy-requestor, .lmrtfy.lmrtfy-roller").forEach(el => el.classList.toggle("lmrtfy-parchment", enabled))` |
+| ② | `LMRTFY.requestor.options.classes.push("lmrtfy-parchment")` / `.filter(...)` reassign | AppV2 DOM element manages its own classes; mutating `options.classes` alone does not update the live element | Keep `options.classes` mutation for future re-renders (guarded with `.includes()` check), but the live DOM is already handled by fix ① |
+| ③ | `LMRTFY.requestor.element.length` | AppV2 `element` is `HTMLElement` (no `.length`) — evaluates to `undefined`, silently skipping `setPosition` | Replace with `LMRTFY.requestor.rendered` |
+
+**Done when:** toggling the `LMRTFY.enableParchmentTheme` setting adds/removes the `lmrtfy-parchment` class on open requestor and roller windows without console errors. The class persists across re-renders. `setPosition` fires correctly when the requestor is open.
+
 ### Phase 4 — Per-system verification pass
 
 Scope: load each listed system individually in a fresh v13 world with a test actor and execute one roll of each enabled type.
@@ -320,7 +332,7 @@ Scope: bump `version` in `module.json`, update the `changelog`, trigger the `.gi
 ## Critical files to modify
 
 - `module.json` — Phase 1.
-- `src/lmrtfy.js` — Phases 1 (utilities, scene controls, data paths, hook names) and 4 (per-system validation).
+- `src/lmrtfy.js` — Phases 1 (utilities, scene controls, data paths, hook names), 3a (`onThemeChange` AppV2 fix), and 4 (per-system validation).
 - `src/roller.js` — Phase 2 (AppV2 rewrite), plus Phase 1 utility/data-path fixes.
 - `src/requestor.js` — Phase 3 (AppV2 rewrite), plus Phase 1 utility fixes.
 - `templates/roller.html` — Phase 2 (add `data-action` attributes).
