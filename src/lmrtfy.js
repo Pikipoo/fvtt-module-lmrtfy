@@ -1,100 +1,46 @@
-import { LMRTFYRequestor } from "./requestor.js";
-import { LMRTFYRoller } from "./roller.js";
-
-const MODULE_ID = "lmrtfy-reloaded";
-const LEGACY_MODULE_ID = "lmrtfy";
-const CLIENT_MIGRATION_KEY = "clientSettingsMigrated";
-const WORLD_MIGRATION_KEY = "worldSettingsMigrated";
-
 class LMRTFY {
-    static legacySettingsCache = new Map();
-    static isMigratingSettings = false;
-    static activeSettingMigrations = 0;
-
     static async init() {
-        const showFailButtonSetting = game.system.id === 'dnd5e';
-        const settings = [
-            {
-                key: 'enableParchmentTheme',
-                name: 'LMRTFY.EnableParchmentTheme',
-                hint: 'LMRTFY.EnableParchmentThemeHint',
-                scope: 'client',
-                config: true,
-                type: Boolean,
-                default: true,
-                onChange: (value) => {
-                    if (LMRTFY.isMigratingSettings) return;
-                    LMRTFY.onThemeChange(value);
-                }
-            },
-            {
-                key: 'deselectOnRequestorRender',
-                name: 'LMRTFY.DeselectOnRequestorRender',
-                hint: 'LMRTFY.DeselectOnRequestorRenderHint',
-                scope: 'world',
-                config: true,
-                type: Boolean,
-                default: false,
-                onChange: () => {
-                    if (LMRTFY.isMigratingSettings) return;
-                    window.location.reload();
-                }
-            },
-            {
-                key: 'useTokenImageOnRequester',
-                name: 'LMRTFY.UseTokenImageOnRequester',
-                hint: 'LMRTFY.UseTokenImageOnRequesterHint',
-                scope: 'world',
-                config: true,
-                type: Boolean,
-                default: false,
-                onChange: () => {
-                    if (LMRTFY.isMigratingSettings) return;
-                    window.location.reload();
-                }
-            },
-            {
-                key: 'showFailButtons',
-                name: 'LMRTFY.ShowFailButtons',
-                hint: 'LMRTFY.ShowFailButtonsHint',
-                scope: 'world',
-                config: showFailButtonSetting,
-                type: Boolean,
-                default: showFailButtonSetting,
-                onChange: () => {
-                    if (LMRTFY.isMigratingSettings) return;
-                    window.location.reload();
-                }
-            }
-        ];
-
-        for (const setting of settings) {
-            LMRTFY.registerSetting(MODULE_ID, setting);
-        }
-
-        game.settings.register(MODULE_ID, CLIENT_MIGRATION_KEY, {
-            name: 'LMRTFY Client Settings Migration',
-            hint: 'Tracks one-time migration of client settings from the legacy namespace.',
+        game.settings.register('lmrtfy', 'enableParchmentTheme', {
+            name: game.i18n.localize('LMRTFY.EnableParchmentTheme'),
+            hint: game.i18n.localize('LMRTFY.EnableParchmentThemeHint'),
             scope: 'client',
-            config: false,
+            config: true,
             type: Boolean,
-            default: false,
+            default: true,
+            onChange: (value) => LMRTFY.onThemeChange(value)
         });
-        game.settings.register(MODULE_ID, WORLD_MIGRATION_KEY, {
-            name: 'LMRTFY World Settings Migration',
-            hint: 'Tracks one-time migration of world settings from the legacy namespace.',
+        game.settings.register('lmrtfy', 'deselectOnRequestorRender', {
+            name: game.i18n.localize('LMRTFY.DeselectOnRequestorRender'),
+            hint: game.i18n.localize('LMRTFY.DeselectOnRequestorRenderHint'),
             scope: 'world',
-            config: false,
+            config: true,
             type: Boolean,
             default: false,
+            onChange: () => window.location.reload()
+        });
+        game.settings.register('lmrtfy', 'useTokenImageOnRequester', {
+            name: game.i18n.localize('LMRTFY.UseTokenImageOnRequester'),
+            hint: game.i18n.localize('LMRTFY.UseTokenImageOnRequesterHint'),
+            scope: 'world',
+            config: true,
+            type: Boolean,
+            default: false,
+            onChange: () => window.location.reload()
         });
 
-        if (!game.modules.get(LEGACY_MODULE_ID)?.active) {
-            for (const setting of settings) {
-                LMRTFY.registerSetting(LEGACY_MODULE_ID, setting, { config: false, onChange: undefined });
-            }
-            LMRTFY.migrateLegacySettings(settings);
+        var showFailButtonSetting = false;
+        if (game.system.id === 'dnd5e') {
+            showFailButtonSetting = true;
         }
+        game.settings.register('lmrtfy', 'showFailButtons', {
+            name: game.i18n.localize('LMRTFY.ShowFailButtons'),
+            hint: game.i18n.localize('LMRTFY.ShowFailButtonsHint'),
+            scope: 'world',
+            config: showFailButtonSetting,
+            type: Boolean,
+            default: showFailButtonSetting, // if it's DnD 5e default to true
+            onChange: () => window.location.reload()
+        });
 
         Handlebars.registerHelper('lmrtfy-controlledToken', function (actor) {
             const actorsControlledToken = canvas.tokens?.controlled.find(t => t.actor.id === actor.id);
@@ -106,7 +52,7 @@ class LMRTFY {
         });
 
         Handlebars.registerHelper('lmrtfy-showTokenImage', function (actor) {
-            if (LMRTFY.getSetting('useTokenImageOnRequester')) {
+            if (game.settings.get('lmrtfy', 'useTokenImageOnRequester')) {
                 return true;
             } else {
                 return false;
@@ -124,7 +70,7 @@ class LMRTFY {
     }
 
     static ready() {
-        game.socket.on(`module.${MODULE_ID}`, LMRTFY.onMessage);
+        game.socket.on('module.lmrtfy', LMRTFY.onMessage);
 
         switch (game.system.id) {
             case 'dnd5eJP':
@@ -148,7 +94,7 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = LMRTFY.create5eAbilities();
                 LMRTFY.modIdentifier = 'mod';
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons');
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons');
                 break;
 
             case 'pf1':
@@ -170,7 +116,7 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = CONFIG.PF1.abilitiesShort;
                 LMRTFY.modIdentifier = 'mod';
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons'); // defaulted to false due to system
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
                 break;
 
             case 'pf2e':
@@ -192,7 +138,7 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = CONFIG.PF2E.abilities;
                 LMRTFY.modIdentifier = 'mod';
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons'); // defaulted to false due to system
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
                 break;
 
             case 'D35E':
@@ -214,7 +160,7 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = CONFIG.D35E.abilityAbbreviations;
                 LMRTFY.modIdentifier = 'mod';
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons'); // defaulted to false due to system
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
                 break;
 
             case 'cof':
@@ -235,7 +181,7 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = CONFIG.COF.statAbbreviations;
                 LMRTFY.modIdentifier = 'mod';
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons'); // defaulted to false due to system
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
                 break;
 
             case 'coc':
@@ -256,7 +202,7 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = CONFIG.COC.statAbbreviations;
                 LMRTFY.modIdentifier = 'mod';
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons'); // defaulted to false due to system
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
             break;
 
             case 'demonlord':
@@ -280,7 +226,7 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = abilities;
                 LMRTFY.modIdentifier = 'modifier';
                 LMRTFY.abilityModifiers = {};
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons'); // defaulted to false due to system
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
                 break;
 
             case 'ose':
@@ -302,7 +248,7 @@ class LMRTFY {
                 LMRTFY.specialRolls = {};
                 LMRTFY.modIdentifier = 'modifier';
                 LMRTFY.abilityModifiers = {};
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons'); // defaulted to false due to system
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
                 break;
             
             case 'foundry-chromatic-dungeons':
@@ -319,7 +265,7 @@ class LMRTFY {
                 LMRTFY.skills = {};
                 LMRTFY.saves = CONFIG.CHROMATIC.saves;
                 LMRTFY.specialRolls = {};
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons'); // defaulted to false due to system
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
                 break;
                 
             case 'degenesis':
@@ -338,7 +284,7 @@ class LMRTFY {
                     LMRTFY.skills = skills;
                 }
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons');
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons');
                 break;
                 
             case 'ffd20':
@@ -360,7 +306,7 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = CONFIG.FFD20.abilitiesShort;
                 LMRTFY.modIdentifier = 'mod';
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons'); // defaulted to false due to system
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
                 break;
 
             case 'dcc':
@@ -391,7 +337,7 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = CONFIG.DCC.abilities;
                 LMRTFY.modIdentifier = 'mod';
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons');
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons');
                 break;
 
             case 'wfrp4e':
@@ -413,7 +359,7 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = game.wfrp4e.config.characteristicsAbbrev;
                 LMRTFY.modIdentifier = '';
                 LMRTFY.abilityModifiers = {};
-                LMRTFY.canFailChecks = LMRTFY.getSetting('showFailButtons');
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons');
                 LMRTFY.wfrp4eDifficultyLabels = game.wfrp4e.config.difficultyLabels;
                 break;
 
@@ -451,69 +397,10 @@ class LMRTFY {
             LMRTFY.canFailChecks = false;
         }
 
-        if (LMRTFY.getSetting('deselectOnRequestorRender')) {
+        if (game.settings.get('lmrtfy', 'deselectOnRequestorRender')) {
             Hooks.on("renderLMRTFYRequestor", () => {
                 canvas.tokens.releaseAll();
             })
-        }
-    }
-
-    static registerSetting(namespace, setting, overrides = {}) {
-        const { key, name, hint, ...config } = setting;
-        game.settings.register(namespace, key, {
-            name: game.i18n.localize(name),
-            hint: game.i18n.localize(hint),
-            ...config,
-            ...overrides,
-        });
-    }
-
-    static getSetting(key) {
-        if (LMRTFY.legacySettingsCache.has(key)) {
-            return LMRTFY.legacySettingsCache.get(key);
-        }
-        return game.settings.get(MODULE_ID, key);
-    }
-
-    static migrateLegacySettings(settings) {
-        const scopes = [
-            { scope: 'client', migrationKey: CLIENT_MIGRATION_KEY },
-            { scope: 'world', migrationKey: WORLD_MIGRATION_KEY },
-        ];
-
-        for (const { scope, migrationKey } of scopes) {
-            if (game.settings.get(MODULE_ID, migrationKey)) continue;
-
-            const pending = [];
-            for (const setting of settings.filter(setting => setting.scope === scope)) {
-                const currentValue = game.settings.get(MODULE_ID, setting.key);
-                const legacyValue = game.settings.get(LEGACY_MODULE_ID, setting.key);
-                if (currentValue === setting.default && legacyValue !== setting.default) {
-                    LMRTFY.legacySettingsCache.set(setting.key, legacyValue);
-                    pending.push([setting.key, legacyValue]);
-                }
-            }
-
-            void LMRTFY.persistMigratedSettings(scope, migrationKey, pending);
-        }
-    }
-
-    static async persistMigratedSettings(scope, migrationKey, pending) {
-        if (scope === 'world' && !game.user.isGM) return;
-
-        LMRTFY.activeSettingMigrations += 1;
-        LMRTFY.isMigratingSettings = true;
-        try {
-            for (const [key, value] of pending) {
-                await game.settings.set(MODULE_ID, key, value);
-                LMRTFY.legacySettingsCache.delete(key);
-            }
-            await game.settings.set(MODULE_ID, migrationKey, true);
-        } catch (error) {
-            console.error('LMRTFY | Failed to migrate legacy settings', error);
-        } finally {
-            LMRTFY.activeSettingMigrations = Math.max(0, LMRTFY.activeSettingMigrations - 1);
-            LMRTFY.isMigratingSettings = LMRTFY.activeSettingMigrations > 0;
         }
     }
 
@@ -573,11 +460,11 @@ class LMRTFY {
             actors = actors.filter(a => !a.hasPlayerOwner);
         }        
         if (actors.length === 0) return;
-        new LMRTFYRoller(actors, data).render(true);
+        new globalThis.LMRTFYRoller(actors, data).render(true);
     }
     static requestRoll() {
         if (LMRTFY.requestor === undefined)
-            LMRTFY.requestor = new LMRTFYRequestor();
+            LMRTFY.requestor = new globalThis.LMRTFYRequestor();
         LMRTFY.requestor.render(true);
     }
 
