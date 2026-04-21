@@ -402,15 +402,20 @@ class LMRTFY {
     }
 
     static onThemeChange(enabled) {
-        $(".lmrtfy.lmrtfy-requestor,.lmrtfy.lmrtfy-roller").toggleClass("lmrtfy-parchment", enabled)
+        document.querySelectorAll(".lmrtfy.lmrtfy-requestor, .lmrtfy.lmrtfy-roller")
+            .forEach(el => el.classList.toggle("lmrtfy-parchment", enabled));
+
         if (!LMRTFY.requestor) return;
-        if (enabled)
-            LMRTFY.requestor.options.classes.push("lmrtfy-parchment")
-        else
-            LMRTFY.requestor.options.classes = LMRTFY.requestor.options.classes.filter(c => c !== "lmrtfy-parchment")
-        // Resize to fit the new theme
-        if (LMRTFY.requestor.element.length)
-            LMRTFY.requestor.setPosition({ width: "auto", height: "auto" })
+
+        if (enabled) {
+            if (!LMRTFY.requestor.options.classes.includes("lmrtfy-parchment"))
+                LMRTFY.requestor.options.classes.push("lmrtfy-parchment");
+        } else {
+            LMRTFY.requestor.options.classes = LMRTFY.requestor.options.classes.filter(c => c !== "lmrtfy-parchment");
+        }
+
+        if (LMRTFY.requestor.rendered)
+            LMRTFY.requestor.setPosition({ width: "auto", height: "auto" });
     }
 
     static getSceneControlButtons(controls) {
