@@ -460,11 +460,11 @@ class LMRTFY {
             actors = actors.filter(a => !a.hasPlayerOwner);
         }        
         if (actors.length === 0) return;
-        new LMRTFYRoller(actors, data).render(true);
+        new globalThis.LMRTFYRoller(actors, data).render(true);
     }
     static requestRoll() {
         if (LMRTFY.requestor === undefined)
-            LMRTFY.requestor = new LMRTFYRequestor();
+            LMRTFY.requestor = new globalThis.LMRTFYRequestor();
         LMRTFY.requestor.render(true);
     }
 
@@ -554,6 +554,7 @@ class LMRTFY {
     }
 }
 
+globalThis.LMRTFY = LMRTFY;
 globalThis.LMRTFYRequestRoll = LMRTFY.requestRoll;
 
 Hooks.once('init', LMRTFY.init);

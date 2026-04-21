@@ -477,3 +477,4 @@ class LMRTFYRequestor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 }
 
+globalThis.LMRTFYRequestor = LMRTFYRequestor;
