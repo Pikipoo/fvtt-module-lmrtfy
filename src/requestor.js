@@ -1,10 +1,12 @@
 
 
-class LMRTFYRequestor extends FormApplication {
-    constructor(...args) {
-        super(...args)
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+
+class LMRTFYRequestor extends HandlebarsApplicationMixin(ApplicationV2) {
+    constructor(options = {}) {
+        super(options);
         game.users.apps.push(this);
-        
+
         this.selectedDice = [];
         this.selectedModifiers = [];
         this.dice = [
@@ -21,10 +23,33 @@ class LMRTFYRequestor extends FormApplication {
         this.diceFormula = '';
         this.bonusFormula = '';
         this.modifierFormula = '';
+
+        if (game.settings.get('lmrtfy', 'enableParchmentTheme')) {
+            this.options.classes.push('lmrtfy-parchment');
+        }
     }
 
-    static get defaultOptions() {
+    static DEFAULT_OPTIONS = {
+        id: "lmrtfy",
+        classes: ["lmrtfy", "lmrtfy-requestor"],
+        tag: "form",
+        position: { width: 600, height: "auto" },
+        window: { title: "LMRTFY.Title", resizable: true },
+        form: {
+            handler: LMRTFYRequestor.#onSubmitForm,
+            closeOnSubmit: false,
+            submitOnChange: false,
+        },
+        actions: {
+            selectAll:             LMRTFYRequestor.prototype._onSelectAll,
+            deselectAll:           LMRTFYRequestor.prototype._onDeselectAll,
+            diceAdd:               LMRTFYRequestor.prototype._onDiceAdd,
+            bonusAdjust:           LMRTFYRequestor.prototype._onBonusAdjust,
+            clearFormula:          LMRTFYRequestor.prototype._onClearFormula,
+        },
+    };
 
+    static get PARTS() {
         let template;
         switch (game.system.id) {
             case "degenesis":
@@ -40,27 +65,12 @@ class LMRTFYRequestor extends FormApplication {
                 template = "modules/lmrtfy/templates/request-rolls.html";
                 break;
         }
-
-        const options = super.defaultOptions;
-        options.title = game.i18n.localize("LMRTFY.Title");
-        options.id = "lmrtfy";
-        options.template = template;
-        options.closeOnSubmit = false;
-        options.popOut = true;
-        options.width = 600;
-        options.height = "auto";
-        options.classes = ["lmrtfy", "lmrtfy-requestor"];
-        if (game.settings.get('lmrtfy', 'enableParchmentTheme')) {
-          options.classes.push('lmrtfy-parchment');
-        }
-        return options;
+        return { form: { template } };
     }
 
-    async getData() {
-        // Return data to the template
-        const actors = game.actors.entities || game.actors.contents;
-        const users = game.users.entities || game.users.contents;
-        // Note: Maybe these work better at a global level, but keeping things simple
+    async _prepareContext(options) {
+        const actors = game.actors.contents;
+        const users = game.users.contents;
         const abilities = LMRTFY.abilities;
         const saves = LMRTFY.saves;
         const abilityModifiers = LMRTFY.abilityModifiers;
@@ -82,7 +92,7 @@ class LMRTFYRequestor extends FormApplication {
                 .sort((a, b) => {
                     const skillA = (LMRTFY.skills[a]?.label) ? LMRTFY.skills[a].label : LMRTFY.skills[a];
                     const skillB = (LMRTFY.skills[b]?.label) ? LMRTFY.skills[b].label : LMRTFY.skills[b];
-                    game.i18n.localize(skillA).localeCompare(skillB)
+                    return game.i18n.localize(skillA).localeCompare(game.i18n.localize(skillB));
                 })
                 .reduce((acc, skillKey) => {
                     const skill = (LMRTFY.skills[skillKey]?.label) ? LMRTFY.skills[skillKey]?.label : LMRTFY.skills[skillKey];
@@ -101,9 +111,7 @@ class LMRTFYRequestor extends FormApplication {
         let tables = null;
         if (game.tables) {
             tables = [];
-            game.tables.forEach(
-                t => tables.push(t.name)
-            );
+            game.tables.forEach(t => tables.push(t.name));
         }
 
         return {
@@ -115,265 +123,263 @@ class LMRTFYRequestor extends FormApplication {
             tables,
             specialRolls: LMRTFY.specialRolls,
             rollModes: CONFIG.Dice.rollModes,
-            showDC: (game.system.id === 'pf2e') ? true : false,
+            showDC: (game.system.id === 'pf2e'),
             abilityModifiers,
             difficultyOptions,
         };
     }
 
-    render(force, context={}) {
-        // Only re-render if needed
-        const {action, data} = context;
-        if (action && !["create", "update", "delete"].includes(action)) return;
-        if (action === "update" && !data.some(d => "character" in d)) return;
-        if (force !== true && !action) return;
-        return super.render(force, context);
-    }
-    
-    activateListeners(html) {
-        super.activateListeners(html);
-        this.element.find(".select-all").click((event) => this.setActorSelection(event, true));
-        this.element.find(".deselect-all").click((event) => this.setActorSelection(event, false));
-        this.element.find("select[name=user]").change(this._onUserChange.bind(this));
-        this.element.find(".lmrtfy-save-roll").click(this._onSubmit.bind(this));
-        this.element.find(".lmrtfy-actor").hover(this._onHoverActor.bind(this));
-        this.element.find(".lmrtfy-dice-tray-button").click(this.diceLeftClick.bind(this));
-        this.element.find(".lmrtfy-dice-tray-button").contextmenu(this.diceRightClick.bind(this));
-        this.element.find(".lmrtfy-bonus-button").click(this.bonusClick.bind(this));
-        this.element.find(".lmrtfy-formula-ability").click(this.modifierClick.bind(this));
-        this.element.find(".lmrtfy-clear-formula").click(this.clearCustomFormula.bind(this));        
-        if ((game.system.id) === "demonlord") this.element.find(".demonlord").change(this.clearDemonLordSettings.bind(this));        
-        this._onUserChange();
+    _onSelectAll(event, target) {
+        this.element.querySelectorAll(".lmrtfy-actor input").forEach(el => el.checked = true);
     }
 
-    setActorSelection(event, enabled) {
-        event.preventDefault();
-        this.element.find(".lmrtfy-actor input").prop("checked", enabled)
+    _onDeselectAll(event, target) {
+        this.element.querySelectorAll(".lmrtfy-actor input").forEach(el => el.checked = false);
     }
 
-    // From _onHoverMacro
-    _onHoverActor(event) {
-        event.preventDefault();
-        const div = event.currentTarget;
+    _onDiceAdd(event, target) {
+        this.selectedDice.push(target.dataset.value);
+        this.diceFormula = this._convertSelectedDiceToFormula();
+        this._combineFormula();
+    }
 
-        // Remove any existing tooltip
-        const tooltip = div.querySelector(".tooltip");
-        if (tooltip) div.removeChild(tooltip);
-
-        // Handle hover-in
-        if (event.type === "mouseenter") {
-            const userId = this.element.find("select[name=user]").val();
-            const actorId = div.dataset.id;
-            const actor = game.actors.get(actorId);
-            if (!actor) return;
-            const gameUsers = game.users.entities || game.users.contents;
-            const user = userId === "character" ? gameUsers.find(u => u.character && u.character.id === actor.id) : null;
-            const tooltip = document.createElement("SPAN");
-            tooltip.classList.add("tooltip");
-            tooltip.textContent = `${actor.name}${user ? ` (${user.name})` : ''}`;
-            div.appendChild(tooltip);
+    _onBonusAdjust(event, target) {
+        let bonus = target.dataset.value;
+        let newBonus = +(this.bonusFormula.trim().replace(' ', '')) + +bonus;
+        if (newBonus === 0) {
+            this.bonusFormula = '';
+        } else {
+            this.bonusFormula = ((newBonus > 0) ? ' + ' : ' - ') + Math.abs(newBonus).toString();
         }
+        this._combineFormula();
+    }
+
+    _onToggleAbilityModifier(event, target) {
+        if (target.checked) {
+            this.selectedModifiers.push(target.dataset.value);
+        } else {
+            const index = this.selectedModifiers.indexOf(target.dataset.value);
+            if (index > -1) this.selectedModifiers.splice(index, 1);
+        }
+        this.modifierFormula = this._convertSelectedModifiersToFormula();
+        this._combineFormula();
+    }
+
+    _onClearFormula(event, target) {
+        this.diceFormula = '';
+        this.modifierFormula = '';
+        this.bonusFormula = '';
+        this.selectedDice = [];
+        this.selectedModifiers = [];
+        this.element.querySelectorAll(".lmrtfy-formula-ability").forEach(el => el.checked = false);
+        this._combineFormula();
     }
 
     _getUserActorIds(userId) {
         let actors = [];
         if (userId === "character") {
-            const gameUsers = game.users.entities || game.users.contents;
-            actors = gameUsers.map(u => u.character?.id).filter(a => a)
+            actors = game.users.contents.map(u => u.character?.id).filter(a => a);
         } else if (userId === "tokens") {
             actors = Array.from(new Set(canvas.tokens.controlled.map(t => t.actor.id))).filter(a => a);
         } else {
             const user = game.users.get(userId);
             if (user) {
-                const gameActors = game.actors.contents || game.actors.entities;
-                actors = gameActors.filter(a => a.testUserPermission(user, "OWNER")).map(a => a.id)
+                actors = game.actors.contents.filter(a => a.testUserPermission(user, "OWNER")).map(a => a.id);
             }
         }
         return actors;
     }
 
     _onUserChange() {
-        const userId = this.element.find("select[name=user]").val();
-        const actors = this._getUserActorIds(userId)
-        this.element.find(".lmrtfy-actor").hide().filter((i, e) => actors.includes(e.dataset.id)).show();
-
-        if (userId === 'selected') {
-            this.element.find(".lmrtfy-request-roll").hide();
-        } else {
-            this.element.find(".lmrtfy-request-roll").show();
+        const userId = this.element.querySelector("select[name=user]").value;
+        const actors = this._getUserActorIds(userId);
+        this.element.querySelectorAll(".lmrtfy-actor").forEach(el => {
+            el.style.display = actors.includes(el.dataset.id) ? '' : 'none';
+        });
+        const requestBtn = this.element.querySelector(".lmrtfy-request-roll");
+        if (requestBtn) {
+            requestBtn.style.display = (userId === 'selected') ? 'none' : '';
         }
     }
 
-    diceLeftClick(event) {
-        this.selectedDice.push(event?.currentTarget?.dataset?.value);
-        this.diceFormula = this.convertSelectedDiceToFormula();
+    _onHoverActor(event) {
+        const div = event.currentTarget;
+        const tooltip = div.querySelector(".tooltip");
+        if (tooltip) div.removeChild(tooltip);
 
-        this.combineFormula();
+        if (event.type === "mouseenter") {
+            const userId = this.element.querySelector("select[name=user]").value;
+            const actorId = div.dataset.id;
+            const actor = game.actors.get(actorId);
+            if (!actor) return;
+            const user = userId === "character"
+                ? game.users.contents.find(u => u.character && u.character.id === actor.id)
+                : null;
+            const tip = document.createElement("span");
+            tip.classList.add("tooltip");
+            tip.textContent = `${actor.name}${user ? ` (${user.name})` : ''}`;
+            div.appendChild(tip);
+        }
     }
 
-    diceRightClick(event) {
-        const index = this.selectedDice.indexOf(event?.currentTarget?.dataset?.value);
-
+    _diceRightClick(event) {
+        event.preventDefault();
+        const value = event.currentTarget.dataset.value;
+        const index = this.selectedDice.indexOf(value);
         if (index > -1) {
             this.selectedDice.splice(index, 1);
         }
-        this.diceFormula = this.convertSelectedDiceToFormula();
-
-        this.combineFormula();
+        this.diceFormula = this._convertSelectedDiceToFormula();
+        this._combineFormula();
     }
 
-    bonusClick(event) {
-        let bonus = event?.currentTarget?.dataset?.value;
-        let newBonus = +(this.bonusFormula.trim().replace(' ', '')) + +bonus;
-        
-        if (newBonus === 0) {
-            this.bonusFormula = '';
-        } else {
-            this.bonusFormula = ((newBonus > 0) ? ' + ' : ' - ') + Math.abs(newBonus).toString();
-        }
-
-        this.combineFormula();
-    }
-
-    modifierClick(event) {
-        let checked = event?.currentTarget?.checked;
-
-        if (checked) {
-            this.selectedModifiers.push(event?.currentTarget?.dataset?.value)
-        } else {
-            const index = this.selectedModifiers.indexOf(event?.currentTarget?.dataset?.value);
-            this.selectedModifiers.splice(index, 1);
-        }
-        
-        this.modifierFormula = this.convertSelectedModifiersToFormula();
-        this.combineFormula();
-    }
-
-    convertSelectedDiceToFormula() {
+    _convertSelectedDiceToFormula() {
         const occurences = (arr, val) => arr.reduce((a, v) => (v === val ? a + 1 : a), 0);
         let formula = '';
-
-        if (!this.selectedDice?.length) {
-            return '';
-        }
-
+        if (!this.selectedDice?.length) return '';
         for (let die of this.dice) {
             let count = occurences(this.selectedDice, die);
-
             if (count > 0) {
-                if (formula?.length) {
-                    formula += ' + ';
-                }
-
+                if (formula?.length) formula += ' + ';
                 formula += count + die;
-            }            
+            }
         }
-
-        return formula;        
+        return formula;
     }
 
-    convertSelectedModifiersToFormula() {
+    _convertSelectedModifiersToFormula() {
         let formula = '';
-
-        if (!this.selectedModifiers?.length) {
-            return '';
-        }
-
+        if (!this.selectedModifiers?.length) return '';
         for (let mod of this.selectedModifiers) {
-            if (formula?.length) {
-                formula += ' + ';
-            }
-
+            if (formula?.length) formula += ' + ';
             formula += `@${mod}`;
         }
-
-        return formula;        
+        return formula;
     }
 
-    combineFormula() {
+    _combineFormula() {
         let customFormula = '';
+        const input = this.element.querySelector(".custom-formula");
         if (this.diceFormula?.length) {
             customFormula += this.diceFormula;
-
             if (this.modifierFormula?.length) {
                 customFormula += ` + ${this.modifierFormula}`;
             }
-
             if (this.bonusFormula?.length) {
                 customFormula += this.bonusFormula;
-            }            
+            }
+        } else if (input) {
+            input.value = '';
+        }
+        if (customFormula?.length && input) {
+            input.value = customFormula;
+        }
+    }
+
+    _clearDemonLordSettings() {
+        const advantage = this.element.querySelector("#advantage");
+        const boonsBanes = this.element.querySelector("#boonsBanes");
+        const additionalModifier = this.element.querySelector("#additionalModifier");
+        if (!advantage || !boonsBanes || !additionalModifier) return;
+
+        if (advantage.value === "-1" || advantage.value === "1") {
+            boonsBanes.disabled = false;
+            additionalModifier.disabled = false;
         } else {
-            this.element.find(".custom-formula").val('');
-        }
-
-        if (customFormula?.length) {
-            this.element.find(".custom-formula").val(customFormula);
+            additionalModifier.value = "0";
+            boonsBanes.value = "0";
+            boonsBanes.disabled = true;
+            additionalModifier.disabled = true;
         }
     }
 
-    clearCustomFormula() {
-        this.diceFormula = '';
-        this.modifierFormula = '';
-        this.bonusFormula = '';
-        this.selectedDice = [];
-        this.selectedModifiers = [];
-        this.element.find(".lmrtfy-formula-ability").prop('checked', false);
+    _onRender(context, options) {
+        const userSelect = this.element.querySelector("select[name=user]");
+        if (userSelect) {
+            userSelect.addEventListener("change", () => this._onUserChange());
+        }
 
-        this.combineFormula();
+        this.element.querySelectorAll(".lmrtfy-actor").forEach(el => {
+            el.addEventListener("mouseenter", this._onHoverActor.bind(this));
+            el.addEventListener("mouseleave", this._onHoverActor.bind(this));
+        });
+
+        this.element.querySelectorAll(".lmrtfy-dice-tray-button:not(.lmrtfy-bonus-button)").forEach(el => {
+            el.addEventListener("contextmenu", this._diceRightClick.bind(this));
+        });
+
+        this.element.querySelectorAll(".lmrtfy-formula-ability").forEach(el => {
+            el.addEventListener("change", (event) => this._onToggleAbilityModifier(event, event.currentTarget));
+        });
+
+        if (game.system.id === "demonlord") {
+            const demonlordSelect = this.element.querySelector(".demonlord");
+            if (demonlordSelect) {
+                demonlordSelect.addEventListener("change", () => this._clearDemonLordSettings());
+            }
+        }
+
+        this._onUserChange();
     }
 
-    clearDemonLordSettings() {
-        if (($("#advantage").val() === "-1") || ($("#advantage").val() === "1")) {
-            $("#boonsBanes").prop('disabled', false);
-            $("#additionalModifier").prop('disabled', false);
+    render(options = {}, _options = {}) {
+        let force = false;
+        let context = {};
+
+        if (typeof options === "boolean") {
+            force = options;
+            context = _options;
         } else {
-            $("#additionalModifier").val("0");
-            $("#boonsBanes").val("0");
-            $("#boonsBanes").prop('disabled', true);
-            $("#additionalModifier").prop('disabled', true);
+            force = options.force ?? false;
+            context = options;
         }
+
+        const { action, data } = context;
+        if (action && !["create", "update", "delete"].includes(action)) return this;
+        if (action === "update" && !data?.some(d => "character" in d)) return this;
+        if (!force && !action) return this;
+
+        return super.render(force ? { force: true } : {});
     }
 
-    async _updateObject(event, formData) {
-        //console.log("LMRTFY submit: ", formData)
-        const saveAsMacro = $(event.currentTarget).hasClass("lmrtfy-save-roll")
-        const keys = Object.keys(formData)
-        const user_actors = this._getUserActorIds(formData.user).map(id => `actor-${id}`);
+    static async #onSubmitForm(event, form, formData) {
+        const data = formData.object;
+        const saveAsMacro = event.submitter?.classList.contains("lmrtfy-save-roll");
+        const keys = Object.keys(data);
+        const user_actors = this._getUserActorIds(data.user).map(id => `actor-${id}`);
+
         const actors = keys.filter(k => k.startsWith("actor-")).reduce((acc, k) => {
-            if (formData[k] && user_actors.includes(k)) 
+            if (data[k] && user_actors.includes(k))
                 acc.push(k.slice(6));
             return acc;
         }, []);
         const abilities = keys.filter(k => k.startsWith("check-")).reduce((acc, k) => {
-            if (formData[k])
-                acc.push(k.slice(6));
+            if (data[k]) acc.push(k.slice(6));
             return acc;
         }, []);
         const saves = keys.filter(k => k.startsWith("save-")).reduce((acc, k) => {
-            if (formData[k])
-                acc.push(k.slice(5));
+            if (data[k]) acc.push(k.slice(5));
             return acc;
         }, []);
         const skills = keys.filter(k => k.startsWith("skill-")).reduce((acc, k) => {
-            if (formData[k])
-                acc.push(k.slice(6));
+            if (data[k]) acc.push(k.slice(6));
             return acc;
         }, []);
-        const tables = formData.table;
-        const formula = formData.formula.trim();
-        const { advantage, mode, title, message } = formData;
+        const tables = data.table;
+        const formula = (data.formula || '').trim();
+        const { advantage, mode, title, message } = data;
 
-        if (formData.user === 'selected' && !saveAsMacro) {
+        if (data.user === 'selected' && !saveAsMacro) {
             ui.notifications.warn(game.i18n.localize("LMRTFY.SelectedNotification"));
             return;
         }
 
-        if ((actors.length === 0 && formData.user !== 'selected') ||
-             (
+        if ((actors.length === 0 && data.user !== 'selected') ||
+            (
                 !message &&
                 abilities.length === 0 && saves.length === 0 && skills.length === 0 &&
-                formula.length === 0 && 
-                !formData['extra-death-save'] && !formData['extra-initiative'] && !formData['extra-perception'] &&
+                formula.length === 0 &&
+                !data['extra-death-save'] && !data['extra-initiative'] && !data['extra-perception'] &&
                 tables?.length === 0
             )
         ) {
@@ -383,30 +389,27 @@ class LMRTFYRequestor extends FormApplication {
 
         let dc = undefined;
         if (game.system.id === 'pf2e') {
-            if (Number.isInteger(parseInt(formData.dc))) {
-                dc = {
-                    value: parseInt(formData.dc),
-                    visibility: formData.visibility
-                }
+            if (Number.isInteger(parseInt(data.dc))) {
+                dc = { value: parseInt(data.dc), visibility: data.visibility };
             }
         }
 
         let boonsBanes = undefined;
         let additionalModifier = undefined;
         if (game.system.id === 'demonlord') {
-            boonsBanes = formData.boonsBanes;
-            additionalModifier = formData.additionalModifier;
+            boonsBanes = data.boonsBanes;
+            additionalModifier = data.additionalModifier;
         }
 
         let difficulty = undefined;
         let slBonus = undefined;
         if (game.system.id === 'wfrp4e') {
-            difficulty = formData.difficulty;
-            slBonus = parseInt(formData.slBonus) || 0;
+            difficulty = data.difficulty;
+            slBonus = parseInt(data.slBonus) || 0;
         }
-    
+
         const socketData = {
-            user: formData.user,
+            user: data.user,
             actors,
             abilities,
             saves,
@@ -416,16 +419,14 @@ class LMRTFYRequestor extends FormApplication {
             title,
             message,
             formula,
-            deathsave: formData['extra-death-save'],
-            initiative: formData['extra-initiative'],
-            perception: formData['extra-perception'],
+            deathsave: data['extra-death-save'],
+            initiative: data['extra-initiative'],
+            perception: data['extra-perception'],
             tables: tables,
-            chooseOne: formData['choose-one'],
+            chooseOne: data['choose-one'],
             canFailChecks: LMRTFY.canFailChecks,
-        }
-        if (game.system.id === 'pf2e' && dc) {
-            socketData['dc'] = dc;
-        }
+        };
+        if (game.system.id === 'pf2e' && dc) socketData['dc'] = dc;
         if (game.system.id === 'demonlord') {
             socketData['boonsBanes'] = boonsBanes;
             socketData['additionalModifier'] = additionalModifier;
@@ -434,7 +435,7 @@ class LMRTFYRequestor extends FormApplication {
             socketData['difficulty'] = difficulty;
             socketData['slBonus'] = slBonus;
         }
-        
+
         if (saveAsMacro) {
             let selectedSection = '';
             if (socketData.user === 'selected') {
@@ -450,7 +451,7 @@ class LMRTFYRequestor extends FormApplication {
             }
 
             const actorTargets = actors.map(a => game.actors.get(a)).filter(a => a).map(a => a.name).join(", ");
-            const user = game.users.get(formData.user) || null;
+            const user = game.users.get(data.user) || null;
             const target = user ? user.name : actorTargets;
             const scriptContent = `// ${title} ${message ? " -- " + message : ""}\n` +
                 `// Request rolls from ${target}\n` +
@@ -470,9 +471,9 @@ class LMRTFYRequestor extends FormApplication {
             macro.sheet.render(true);
         } else {
             game.socket.emit('module.lmrtfy', socketData);
-            // Send to ourselves
             LMRTFY.onMessage(socketData);
-            ui.notifications.info(game.i18n.localize("LMRTFY.SentNotification"))
+            ui.notifications.info(game.i18n.localize("LMRTFY.SentNotification"));
         }
     }
 }
+

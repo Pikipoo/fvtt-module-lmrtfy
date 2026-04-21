@@ -80,5 +80,6 @@
     "LMRTFY.DemonLordNoBoonsBanes": "No Boons/Banes",
     "LMRTFY.WFRP4eDifficulty": "Difficulty:",
     "LMRTFY.WFRP4eSLBonus": "SL Bonus:",
-    "LMRTFY.WFRP4eCharacteristics": "Characteristics:"
+    "LMRTFY.WFRP4eCharacteristics": "Characteristics:",
+    "LMRTFY.SystemNotVerified": "LMRTFY: {system} system configuration not detected. Roll requests may not work correctly."
 }
