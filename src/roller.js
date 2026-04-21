@@ -1,8 +1,6 @@
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-const MODULE_ID = "lmrtfy-reloaded";
-
-export class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
+class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
 
     constructor(actors, data) {
         super();
@@ -36,7 +34,7 @@ export class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
             this.options.window.title = data.title;
         }
 
-        if (LMRTFY.getSetting('enableParchmentTheme')) {
+        if (game.settings.get('lmrtfy', 'enableParchmentTheme')) {
             this.options.classes.push('lmrtfy-parchment');
         }
 
@@ -114,7 +112,7 @@ export class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
     };
 
     static PARTS = {
-        body: { template: `modules/${MODULE_ID}/templates/roller.html` },
+        body: { template: "modules/lmrtfy/templates/roller.html" },
     };
 
     static requestAbilityChecks(actor, abilities, options={}) {
