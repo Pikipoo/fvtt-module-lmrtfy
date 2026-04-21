@@ -783,3 +783,5 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
         if (normalButton) normalButton.disabled = !normalButton.disabled;
     }
 }
+
+globalThis.LMRTFYRoller = LMRTFYRoller;
