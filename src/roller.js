@@ -293,7 +293,8 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
                             break;
 
                         case this.pf2eRollFor.SAVE:
-                            const save = actor.saves[args[0]].check;
+                            const save = actor.saves?.[args[0]]?.check;
+                            if (!save) continue;
                             const saveOptions = actor.getRollOptions(['all', `${save.ability}-based`, 'saving-throw', save.name]);
                             save.roll({ event, saveOptions, dc: this.dc });
                             break;
@@ -309,6 +310,7 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
                             break;
 
                         case this.pf2eRollFor.PERCEPTION:
+                            if (!actor.perception?.roll) continue;
                             const precOptions = actor.getRollOptions(['all', 'wis-based', 'perception']);
                             actor.perception.roll({ event, precOptions, dc: this.dc });
                             break;
@@ -319,7 +321,11 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
 
                 case "foundry-chromatic-dungeons": {
                     const key = args[0];
-                    const {attributes, attributeMods, saves} = actor.system.data;
+                    const {attributes, attributeMods, saves} = actor.system;
+                    if (!attributes || !attributeMods) {
+                        console.warn("LMRTFY | Chromatic Dungeons: actor.system data structure not found.");
+                        continue;
+                    }
                     let label, formula, target;
 
                     switch (rollMethod) {
@@ -340,12 +346,20 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
                 }
 
                 case "degenesis": {
+                    if (typeof actor[rollMethod] !== 'function') {
+                        console.warn("LMRTFY | Degenesis: roll method not found on actor.");
+                        continue;
+                    }
                     const key = args[0];
                     actor[rollMethod].call(actor, key, false)
                     break;
                 }
 
                 case "demonlord": {
+                    if (typeof actor.rollAttributeChallenge !== 'function' || typeof actor.getAttribute !== 'function') {
+                        console.warn("LMRTFY | Demonlord: rollAttributeChallenge or getAttribute not found on actor.");
+                        continue;
+                    }
                     const key = args[0];
                     switch(this.advantage) {
                       case 0:
@@ -365,6 +379,10 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
                 }
 
                 case "wfrp4e": {
+                    if (typeof actor[rollMethod] !== 'function') {
+                        console.warn(`LMRTFY | WFRP4e: actor.${rollMethod} not found.`);
+                        continue;
+                    }
                     const key = args[0];
                     await actor[rollMethod].call(actor, key, {
                         fields: {
@@ -394,7 +412,12 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
         game.settings.set("core", "rollMode", this.mode || CONST.DICE_ROLL_MODES);
 
         for (let actor of this.actors) {
-            const initiative = actor.system.attributes.initiative;
+            const initiative = actor.system?.attributes?.initiative;
+            if (!initiative?.roll) {
+                console.warn("LMRTFY | PF2e: actor.system.attributes.initiative not found, falling back to rollInitiative.");
+                actor.rollInitiative();
+                continue;
+            }
             const rollNames = ['all', 'initiative'];
             if (initiative.ability === 'perception') {
                 rollNames.push('wis-based');
@@ -428,12 +451,12 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
             for (let actor of this.actors) {
                 combatantFound = null
                 for (const combatant of game.combat.combatants) {
-                    if (combatant.actor?._id === actor._id) {
+                    if (combatant.actor?.id === actor.id) {
                         combatantFound = combatant
                     }
                 }
                 if (combatantFound) {
-                    game.combat.rollInitiative(combatantFound._id)
+                    game.combat.rollInitiative(combatantFound.id)
                 } else {
                     ui.notifications.warn(game.i18n.localize("LMRTFY.DemonLordNoCombat"));
                 }
@@ -677,7 +700,11 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
                     target.disabled = true;
                     this._checkClose();
                 } else {
-                    const initiative = CONFIG.Combat.initiative.formula || game.system.data.initiative;
+                    let initiative = CONFIG.Combat.initiative.formula;
+                    if (!initiative) {
+                        console.warn("LMRTFY | No initiative formula found in CONFIG.Combat.initiative.formula, falling back to 1d20");
+                        initiative = "1d20";
+                    }
                     this._makeDiceRoll(event, target, initiative, game.i18n.localize("LMRTFY.InitiativeRollMessage"));
                 }
                 break;
@@ -689,12 +716,12 @@ class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
         switch (game.system.id) {
             case "dnd5e":
                 for (let actor of this.actors) {
-                    actor.rollDeathSave(event);
+                    if (typeof actor.rollDeathSave === 'function') actor.rollDeathSave(event);
                 }
                 break
             case "pf2e":
                 for (let actor of this.actors) {
-                    actor.rollRecovery();
+                    if (typeof actor.rollRecovery === 'function') actor.rollRecovery();
                 }
                 break;
             case "demonlord":

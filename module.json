@@ -84,6 +84,7 @@
         "foundry-chromatic-dungeons",
         "degenesis",
         "ffd20",
+        "dcc",
         "wfrp4e"
     ],
     "relationships": {
@@ -91,7 +92,7 @@
             {
                 "id": "dnd5e",
                 "type": "system",
-                "manifest": "https://gitlab.com/asacolips-projects/foundry-mods/archmage/-/raw/2.0.2/system.json",
+                "manifest": "https://github.com/foundryvtt/dnd5e/releases/latest/download/system.json",
                 "compatibility": {
                     "verified": "13"
                 }
@@ -111,7 +112,7 @@
             {
                 "id": "pf2e",
                 "type": "system",
-                "manifest": "https://github.com/foundryvtt/pf2e/releases/download/3.13.6/system.json",
+                "manifest": "https://github.com/foundryvtt/pf2e/releases/latest/download/system.json",
                 "compatibility": {
                     "verified": "13"
                 }
@@ -119,9 +120,9 @@
             {
                 "id": "D35E",
                 "type": "system",
-                "manifest": "https://github.com/Rughalt/D35E/blob/master/system.json",
+                "manifest": "https://raw.githubusercontent.com/Rughalt/D35E/master/system.json",
                 "compatibility": {
-                    "verified": "13"
+                    "verified": "12"
                 }
             },
             {
@@ -133,7 +134,7 @@
                 "type": "system",
                 "manifest": "https://github.com/ZigmundKreud/cof/releases/download/9.269.3/system.json",
                 "compatibility": {
-                    "verified": "13"
+                    "verified": "12"
                 }
             },
             {
@@ -141,7 +142,7 @@
                 "type": "system",
                 "manifest": "https://github.com/ZigmundKreud/coc/releases/download/9.269.4/system.json",
                 "compatibility": {
-                    "verified": "13"
+                    "verified": "12"
                 }
             },
             {
@@ -165,7 +166,7 @@
                 "type": "system",
                 "manifest": "https://github.com/wyrmisis/foundry-chromatic-dungeons/releases/download/1.1.0/system.json",
                 "compatibility": {
-                    "verified": "13"
+                    "verified": "12"
                 }
             },
             {
@@ -173,15 +174,15 @@
                 "type": "system",
                 "manifest": "https://github.com/greedyj4ck/DEGENESIS-FoundryVTT/releases/latest/download/system.json",
                 "compatibility": {
-                    "verified": "13"
+                    "verified": "12"
                 }
             },
             {
                 "id": "ffd20",
                 "type": "system",
-                "manifest": "https://github.com/Ritsuna/Foundry_FFD20/blob/master/system.json",
+                "manifest": "https://raw.githubusercontent.com/Ritsuna/Foundry_FFD20/master/system.json",
                 "compatibility": {
-                    "verified": "13"
+                    "verified": "12"
                 }
             },
             {

@@ -76,6 +76,11 @@ class LMRTFY {
             case 'dnd5eJP':
             case 'dnd5e':
             case 'sw5e':
+                if (!CONFIG.DND5E?.abilities) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 LMRTFY.saveRollMethod = 'rollAbilitySave';
                 LMRTFY.abilityRollMethod = 'rollAbilityTest';
                 LMRTFY.skillRollMethod = 'rollSkill';
@@ -93,6 +98,11 @@ class LMRTFY {
                 break;
 
             case 'pf1':
+                if (!CONFIG.PF1?.abilities) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 LMRTFY.saveRollMethod = 'rollSavingThrow';
                 LMRTFY.abilityRollMethod = 'rollAbility';
                 LMRTFY.skillRollMethod = 'rollSkill';
@@ -110,6 +120,11 @@ class LMRTFY {
                 break;
 
             case 'pf2e':
+                if (!CONFIG.PF2E?.abilities) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 LMRTFY.saveRollMethod = 'rollSave';
                 LMRTFY.abilityRollMethod = 'rollAbility';
                 LMRTFY.skillRollMethod = 'rollSkill';
@@ -127,6 +142,11 @@ class LMRTFY {
                 break;
 
             case 'D35E':
+                if (!CONFIG.D35E?.abilities) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 LMRTFY.saveRollMethod = 'rollSave';
                 LMRTFY.abilityRollMethod = 'rollAbility';
                 LMRTFY.skillRollMethod = 'rollSkill';
@@ -144,6 +164,11 @@ class LMRTFY {
                 break;
 
             case 'cof':
+                if (!CONFIG.COF?.stats) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 LMRTFY.saveRollMethod = 'rollStat';
                 LMRTFY.abilityRollMethod = 'rollStat';
                 LMRTFY.skillRollMethod = 'rollStat';
@@ -160,6 +185,11 @@ class LMRTFY {
                 break;
 
             case 'coc':
+                if (!CONFIG.COC?.stats) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 LMRTFY.saveRollMethod = 'rollStat';
                 LMRTFY.abilityRollMethod = 'rollStat';
                 LMRTFY.skillRollMethod = 'rollStat';
@@ -176,7 +206,12 @@ class LMRTFY {
             break;
 
             case 'demonlord':
-                const abilities = foundry.utils.duplicate(CONFIG.DL.attributes);
+                if (!CONFIG.DL?.attributes) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
+                const abilities = foundry.utils.deepClone(CONFIG.DL.attributes);
                 delete abilities.defense;
                 LMRTFY.saveRollMethod = 'rollChallenge';
                 LMRTFY.abilityRollMethod = 'rollChallenge';
@@ -195,6 +230,11 @@ class LMRTFY {
                 break;
 
             case 'ose':
+                if (!CONFIG.OSE?.scores) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 LMRTFY.saveRollMethod = 'rollSave';
                 LMRTFY.abilityRollMethod = 'rollCheck';
                 LMRTFY.skillRollMethod = 'rollExploration';
@@ -205,8 +245,6 @@ class LMRTFY {
                 LMRTFY.normalRollEvent = {};
                 LMRTFY.advantageRollEvent = {};
                 LMRTFY.disadvantageRollEvent = {};
-                LMRTFY.modIdentifier = 'mod';
-                LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
                 LMRTFY.specialRolls = {};
                 LMRTFY.modIdentifier = 'modifier';
                 LMRTFY.abilityModifiers = {};
@@ -214,6 +252,11 @@ class LMRTFY {
                 break;
             
             case 'foundry-chromatic-dungeons':
+                if (!CONFIG.CHROMATIC?.attributeLabels) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 LMRTFY.saveRollMethod = 'saveRoll';
                 LMRTFY.abilityRollMethod = 'attributeRoll';
                 LMRTFY.skillRollMethod = null;
@@ -227,19 +270,29 @@ class LMRTFY {
                 
             case 'degenesis':
                 LMRTFY.skillRollMethod = 'rollSkill';
-
-                let skills = game.actors.contents[0].skills;
-                for (const [key, value] of Object.entries(skills)) {
-                    skills[key]["label"] = key;
-                    skills[key]["ability"] = value.attribute;
+                const firstActor = game.actors.contents[0];
+                if (!firstActor?.skills) {
+                    console.warn("LMRTFY | Degenesis: No actors found or actor.skills unavailable. Skill list will be empty.");
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    LMRTFY.skills = {};
+                } else {
+                    let skills = firstActor.skills;
+                    for (const [key, value] of Object.entries(skills)) {
+                        skills[key]["label"] = key;
+                        skills[key]["ability"] = value.attribute;
+                    }
+                    LMRTFY.skills = skills;
                 }
-                LMRTFY.skills = skills;
-
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
-                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons');
                 break;
                 
             case 'ffd20':
+                if (!CONFIG.FFD20?.abilities) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 LMRTFY.saveRollMethod = 'rollSavingThrow';
                 LMRTFY.abilityRollMethod = 'rollAbilityTest';
                 LMRTFY.skillRollMethod = 'rollSkill';
@@ -247,14 +300,21 @@ class LMRTFY {
                 LMRTFY.skills = CONFIG.FFD20.skills;
                 LMRTFY.saves = CONFIG.FFD20.savingThrows;
                 LMRTFY.normalRollEvent = { shiftKey: false, altKey: false, ctrlKey: false };
+                LMRTFY.advantageRollEvent = { shiftKey: false, altKey: true, ctrlKey: false };
+                LMRTFY.disadvantageRollEvent = { shiftKey: false, altKey: false, ctrlKey: true };
                 LMRTFY.specialRolls = { 'initiative': true, 'deathsave': false, 'perception': false };
-                LMRTFY.abilityAbbreviations = CONFIG.abilitiesShort;
+                LMRTFY.abilityAbbreviations = CONFIG.FFD20.abilitiesShort;
                 LMRTFY.modIdentifier = 'mod';
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
                 LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons'); // defaulted to false due to system
                 break;
 
             case 'dcc':
+                if (!CONFIG.DCC?.abilities) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 // which method on the Actor class can roll the appropriate check?
                 LMRTFY.saveRollMethod = 'rollSavingThrow';
                 LMRTFY.abilityRollMethod = 'rollAbilityCheck';
@@ -268,6 +328,7 @@ class LMRTFY {
                 // is there any special keybinding the system might expect for these kinds of rolls
                 LMRTFY.normalRollEvent = { shiftKey: true, altKey: false, ctrlKey: false };
                 LMRTFY.advantageRollEvent = { shiftKey: false, altKey: false, ctrlKey: true };
+                LMRTFY.disadvantageRollEvent = { shiftKey: false, altKey: false, ctrlKey: true };
 
                 // does your system support initiative rolls or deathsaves (as dnd5e understands them)?
                 LMRTFY.specialRolls = { 'initiative': true, 'deathsave': false, 'perception': false };
@@ -276,9 +337,15 @@ class LMRTFY {
                 LMRTFY.abilityAbbreviations = CONFIG.DCC.abilities;
                 LMRTFY.modIdentifier = 'mod';
                 LMRTFY.abilityModifiers = LMRTFY.parseAbilityModifiers();
+                LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons');
                 break;
 
             case 'wfrp4e':
+                if (!CONFIG.WFRP4E?.characteristics) {
+                    console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
+                    ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
+                    break;
+                }
                 LMRTFY.saveRollMethod = '';
                 LMRTFY.abilityRollMethod = 'setupCharacteristic';
                 LMRTFY.skillRollMethod = 'setupSkill';
