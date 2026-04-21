@@ -1,14 +1,18 @@
 {
-    "id": "lmrtfy-pextra",
-    "name": "lmrtfy-pextra",
-    "title": "Let Me Roll That For You! - Pikipoo's extra",
+    "id": "lmrtfy-reloaded",
+    "name": "lmrtfy-reloaded",
+    "title": "Let Me Roll That For You! - Reloaded",
     "description": "Ask your players to make rolls for you.",
-    "version": "3.2.0",
-    "author": "KaKaRoTo, iotech, Limping Ninja, Rughalt, Calego, VTT Lair",
+    "version": "4.0.0-rc1",
+    "author": "KaKaRoTo, iotech, Limping Ninja, Rughalt, Calego, VTT Lair, Pikipoo",
     "authors": [
         {
           "name": "VTT Lair",
           "url": "https://github.com/vtt-lair"
+        },
+        {
+            "name": "Pikipoo",
+            "url": "https://github.com/Pikipoo"
         }
     ],
     "scripts": [
