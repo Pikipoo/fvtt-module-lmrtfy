@@ -2,9 +2,7 @@
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-const MODULE_ID = "lmrtfy-reloaded";
-
-export class LMRTFYRequestor extends HandlebarsApplicationMixin(ApplicationV2) {
+class LMRTFYRequestor extends HandlebarsApplicationMixin(ApplicationV2) {
     constructor(options = {}) {
         super(options);
         game.users.apps.push(this);
@@ -26,7 +24,7 @@ export class LMRTFYRequestor extends HandlebarsApplicationMixin(ApplicationV2) {
         this.bonusFormula = '';
         this.modifierFormula = '';
 
-        if (LMRTFY.getSetting('enableParchmentTheme')) {
+        if (game.settings.get('lmrtfy', 'enableParchmentTheme')) {
             this.options.classes.push('lmrtfy-parchment');
         }
     }
@@ -55,16 +53,16 @@ export class LMRTFYRequestor extends HandlebarsApplicationMixin(ApplicationV2) {
         let template;
         switch (game.system.id) {
             case "degenesis":
-                template = `modules/${MODULE_ID}/templates/degenesis-request-rolls.html`;
+                template = "modules/lmrtfy/templates/degenesis-request-rolls.html";
                 break;
             case "demonlord":
-                template = `modules/${MODULE_ID}/templates/demonlord-request-rolls.html`;
+                template = "modules/lmrtfy/templates/demonlord-request-rolls.html";
                 break;
             case "wfrp4e":
-                template = `modules/${MODULE_ID}/templates/wfrp4e-request-rolls.html`;
+                template = "modules/lmrtfy/templates/wfrp4e-request-rolls.html";
                 break;
             default:
-                template = `modules/${MODULE_ID}/templates/request-rolls.html`;
+                template = "modules/lmrtfy/templates/request-rolls.html";
                 break;
         }
         return { form: { template } };
@@ -462,7 +460,7 @@ export class LMRTFYRequestor extends HandlebarsApplicationMixin(ApplicationV2) {
                 `// Skills: ${skills.map(s => LMRTFY.skills[s]).filter(s => s).join(", ")}\n` +
                 `const data = ${JSON.stringify(socketData, null, 2)};\n\n` +
                 `${selectedSection}` +
-                `game.socket.emit('module.${MODULE_ID}', data);\n`;
+                `game.socket.emit('module.lmrtfy', data);\n`;
             const macro = await Macro.create({
                 name: "LMRTFY: " + (message || title),
                 type: "script",
@@ -472,7 +470,7 @@ export class LMRTFYRequestor extends HandlebarsApplicationMixin(ApplicationV2) {
             });
             macro.sheet.render(true);
         } else {
-            game.socket.emit(`module.${MODULE_ID}`, socketData);
+            game.socket.emit('module.lmrtfy', socketData);
             LMRTFY.onMessage(socketData);
             ui.notifications.info(game.i18n.localize("LMRTFY.SentNotification"));
         }
