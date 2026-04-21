@@ -3,7 +3,7 @@
     "name": "lmrtfy-reloaded",
     "title": "Let Me Roll That For You! - Reloaded",
     "description": "Ask your players to make rolls for you.",
-    "version": "4.0.0-rc2",
+    "version": "4.0.0-rc3",
     "author": "KaKaRoTo, iotech, Limping Ninja, Rughalt, Calego, VTT Lair, Pikipoo",
     "authors": [
         {
@@ -16,9 +16,9 @@
         }
     ],
     "scripts": [
-        "./src/lmrtfy.js",
         "./src/requestor.js",
-        "./src/roller.js"
+        "./src/roller.js",
+        "./src/lmrtfy.js"
     ],
     "styles": [
         "/css/lmrtfy.css"
