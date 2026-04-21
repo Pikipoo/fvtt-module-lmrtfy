@@ -36,7 +36,7 @@ export class LMRTFYRoller extends HandlebarsApplicationMixin(ApplicationV2) {
             this.options.window.title = data.title;
         }
 
-        if (game.settings.get('lmrtfy', 'enableParchmentTheme')) {
+        if (LMRTFY.getSetting('enableParchmentTheme')) {
             this.options.classes.push('lmrtfy-parchment');
         }
 

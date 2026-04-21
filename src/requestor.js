@@ -26,7 +26,7 @@ export class LMRTFYRequestor extends HandlebarsApplicationMixin(ApplicationV2) {
         this.bonusFormula = '';
         this.modifierFormula = '';
 
-        if (game.settings.get('lmrtfy', 'enableParchmentTheme')) {
+        if (LMRTFY.getSetting('enableParchmentTheme')) {
             this.options.classes.push('lmrtfy-parchment');
         }
     }
