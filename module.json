@@ -16,9 +16,9 @@
         }
     ],
     "scripts": [
-        "./src/lmrtfy.js",
         "./src/requestor.js",
-        "./src/roller.js"
+        "./src/roller.js",
+        "./src/lmrtfy.js"
     ],
     "styles": [
         "/css/lmrtfy.css"
