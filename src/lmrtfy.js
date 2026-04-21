@@ -341,7 +341,7 @@ class LMRTFY {
                 break;
 
             case 'wfrp4e':
-                if (!CONFIG.WFRP4E?.characteristics) {
+                if (!game.wfrp4e?.config?.characteristics) {
                     console.warn(`LMRTFY | ${game.system.id} CONFIG not found or incompatible. LMRTFY features may not work.`);
                     ui.notifications.warn(game.i18n.format("LMRTFY.SystemNotVerified", { system: game.system.id }));
                     break;
@@ -349,18 +349,18 @@ class LMRTFY {
                 LMRTFY.saveRollMethod = '';
                 LMRTFY.abilityRollMethod = 'setupCharacteristic';
                 LMRTFY.skillRollMethod = 'setupSkill';
-                LMRTFY.abilities = CONFIG.WFRP4E.characteristics;
+                LMRTFY.abilities = game.wfrp4e.config.characteristics;
                 LMRTFY.skills = {};
                 LMRTFY.saves = {};
                 LMRTFY.normalRollEvent = {};
                 LMRTFY.advantageRollEvent = {};
                 LMRTFY.disadvantageRollEvent = {};
                 LMRTFY.specialRolls = { 'initiative': true, 'deathsave': false, 'perception': false };
-                LMRTFY.abilityAbbreviations = CONFIG.WFRP4E.characteristicsAbbrev;
+                LMRTFY.abilityAbbreviations = game.wfrp4e.config.characteristicsAbbrev;
                 LMRTFY.modIdentifier = '';
                 LMRTFY.abilityModifiers = {};
                 LMRTFY.canFailChecks = game.settings.get('lmrtfy', 'showFailButtons');
-                LMRTFY.wfrp4eDifficultyLabels = CONFIG.WFRP4E.difficultyLabels;
+                LMRTFY.wfrp4eDifficultyLabels = game.wfrp4e.config.difficultyLabels;
                 break;
 
             default:
