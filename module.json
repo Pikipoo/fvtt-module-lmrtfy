@@ -1,14 +1,18 @@
 {
-    "id": "lmrtfy-pextra",
-    "name": "lmrtfy-pextra",
-    "title": "Let Me Roll That For You! - Pikipoo's extra",
+    "id": "lmrtfy-reloaded",
+    "name": "lmrtfy-reloaded",
+    "title": "Let Me Roll That For You! - Reloaded",
     "description": "Ask your players to make rolls for you.",
-    "version": "3.2.0-rc1",
-    "author": "KaKaRoTo, iotech, Limping Ninja, Rughalt, Calego, VTT Lair",
+    "version": "4.0.0-rc1",
+    "author": "KaKaRoTo, iotech, Limping Ninja, Rughalt, Calego, VTT Lair, Pikipoo",
     "authors": [
         {
           "name": "VTT Lair",
           "url": "https://github.com/vtt-lair"
+        },
+        {
+            "name": "Pikipoo",
+            "url": "https://github.com/Pikipoo"
         }
     ],
     "scripts": [
@@ -19,11 +23,9 @@
     "styles": [
         "/css/lmrtfy.css"
     ],
-    "minimumCoreVersion": "10",
-    "compatibleCoreVersion": "10",
     "compatibility": {
-        "minimum": "10",
-        "verified": "10"
+        "minimum": "13",
+        "verified": "13"
     },
     "languages": [
         {
@@ -86,6 +88,7 @@
         "foundry-chromatic-dungeons",
         "degenesis",
         "ffd20",
+        "dcc",
         "wfrp4e"
     ],
     "relationships": {
@@ -93,9 +96,9 @@
             {
                 "id": "dnd5e",
                 "type": "system",
-                "manifest": "https://gitlab.com/asacolips-projects/foundry-mods/archmage/-/raw/2.0.2/system.json",
+                "manifest": "https://github.com/foundryvtt/dnd5e/releases/latest/download/system.json",
                 "compatibility": {
-                    "verified": "2.0.2"
+                    "verified": "13"
                 }
             },
             {
@@ -107,23 +110,23 @@
                 "type": "system",
                 "manifest": "https://gitlab.com/foundryvtt_pathfinder1e/foundryvtt-pathfinder1/-/releases/v0.82.1/downloads/system.json",
                 "compatibility": {
-                    "verified": "0.82.1"
+                    "verified": "13"
                 }
             },
             {
                 "id": "pf2e",
                 "type": "system",
-                "manifest": "https://github.com/foundryvtt/pf2e/releases/download/3.13.6/system.json",
+                "manifest": "https://github.com/foundryvtt/pf2e/releases/latest/download/system.json",
                 "compatibility": {
-                    "verified": "3.13.6"
+                    "verified": "13"
                 }
             },
             {
                 "id": "D35E",
                 "type": "system",
-                "manifest": "https://github.com/Rughalt/D35E/blob/master/system.json",
+                "manifest": "https://raw.githubusercontent.com/Rughalt/D35E/master/system.json",
                 "compatibility": {
-                    "verified": "0.99.1"
+                    "verified": "12"
                 }
             },
             {
@@ -135,7 +138,7 @@
                 "type": "system",
                 "manifest": "https://github.com/ZigmundKreud/cof/releases/download/9.269.3/system.json",
                 "compatibility": {
-                    "verified": "9.269.3"
+                    "verified": "12"
                 }
             },
             {
@@ -143,7 +146,7 @@
                 "type": "system",
                 "manifest": "https://github.com/ZigmundKreud/coc/releases/download/9.269.4/system.json",
                 "compatibility": {
-                    "verified": "9.269.4"
+                    "verified": "12"
                 }
             },
             {
@@ -151,7 +154,7 @@
                 "type": "system",
                 "manifest": "https://github.com/Xacus/demonlord/releases/download/2.2.1/system.json",
                 "compatibility": {
-                    "verified": "2.2.1"
+                    "verified": "13"
                 }
             },
             {
@@ -159,7 +162,7 @@
                 "type": "system",
                 "manifest": "https://github.com/vttred/ose/releases/download/1.6.2/system.json",
                 "compatibility": {
-                    "verified": "1.6.2"
+                    "verified": "13"
                 }
             },
             {
@@ -167,7 +170,7 @@
                 "type": "system",
                 "manifest": "https://github.com/wyrmisis/foundry-chromatic-dungeons/releases/download/1.1.0/system.json",
                 "compatibility": {
-                    "verified": "1.1.0"
+                    "verified": "12"
                 }
             },
             {
@@ -175,15 +178,15 @@
                 "type": "system",
                 "manifest": "https://github.com/greedyj4ck/DEGENESIS-FoundryVTT/releases/latest/download/system.json",
                 "compatibility": {
-                    "verified": "0.5.1"
+                    "verified": "12"
                 }
             },
             {
                 "id": "ffd20",
                 "type": "system",
-                "manifest": "https://github.com/Ritsuna/Foundry_FFD20/blob/master/system.json",
+                "manifest": "https://raw.githubusercontent.com/Ritsuna/Foundry_FFD20/master/system.json",
                 "compatibility": {
-                    "verified": "10.1.7"
+                    "verified": "12"
                 }
             },
             {
@@ -191,7 +194,7 @@
                 "type": "system",
                 "manifest": "https://raw.githubusercontent.com/foundryvtt-dcc/dcc/main/system.json",
                 "compatibility": {
-                    "verified": "0.43.0"
+                    "verified": "13"
                 }
             },
             {
@@ -199,7 +202,7 @@
                 "type": "system",
                 "manifest": "https://github.com/moo-man/WFRP4e-FoundryVTT/releases/latest/download/system.json",
                 "compatibility": {
-                    "verified": "9.5.4"
+                    "verified": "13"
                 }
             }
         ]

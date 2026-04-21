@@ -1,6 +1,6 @@
 name: Release Creation
 
-on: 
+on:
   release:
     types: [published]
 
@@ -44,15 +44,16 @@ jobs:
         tag: ${{ github.event.release.tag_name }}
         body: ${{ github.event.release.body }}
 
+    # TODO: Add the module to the FoundryVTT repo. This is currently not working.
     # Publish to FoundryVTT
-    - name: Publish to Foundry VTT Repo
-      id: publish_foundry_repo
-      run: npx @ghost-fvtt/foundry-publish
-      env:
-        FVTT_MANIFEST_PATH: 'module.json'
-        FVTT_PACKAGE_ID: 26
-        FVTT_USERNAME: ${{ secrets.FOUNDRY_ADMIN_USER  }}
-        FVTT_PASSWORD: ${{ secrets.FOUNDRY_ADMIN_PW }}
+    # - name: Publish to Foundry VTT Repo
+    #   id: publish_foundry_repo
+    #   run: npx @ghost-fvtt/foundry-publish
+    #   env:
+    #     FVTT_MANIFEST_PATH: 'module.json'
+    #     FVTT_PACKAGE_ID: 26
+    #     FVTT_USERNAME: ${{ secrets.FOUNDRY_ADMIN_USER  }}
+    #     FVTT_PASSWORD: ${{ secrets.FOUNDRY_ADMIN_PW }}
 
     # No longer working
     #- name: FoundryVTT AutoPublish
