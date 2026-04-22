@@ -29,25 +29,27 @@ class LMRTFYRequestor extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
 
-    static DEFAULT_OPTIONS = {
-        id: "lmrtfy",
-        classes: ["lmrtfy", "lmrtfy-requestor"],
-        tag: "form",
-        position: { width: 600, height: "auto" },
-        window: { title: "LMRTFY.Title", resizable: true },
-        form: {
-            handler: LMRTFYRequestor.#onSubmitForm,
-            closeOnSubmit: false,
-            submitOnChange: false,
-        },
-        actions: {
-            selectAll:             LMRTFYRequestor.prototype._onSelectAll,
-            deselectAll:           LMRTFYRequestor.prototype._onDeselectAll,
-            diceAdd:               LMRTFYRequestor.prototype._onDiceAdd,
-            bonusAdjust:           LMRTFYRequestor.prototype._onBonusAdjust,
-            clearFormula:          LMRTFYRequestor.prototype._onClearFormula,
-        },
-    };
+    static get DEFAULT_OPTIONS() {
+        return {
+            id: "lmrtfy",
+            classes: ["lmrtfy", "lmrtfy-requestor"],
+            tag: "form",
+            position: { width: 600, height: "auto" },
+            window: { title: "LMRTFY.Title", resizable: true },
+            form: {
+                handler: LMRTFYRequestor.#onSubmitForm,
+                closeOnSubmit: false,
+                submitOnChange: false,
+            },
+            actions: {
+                selectAll:             LMRTFYRequestor.prototype._onSelectAll,
+                deselectAll:           LMRTFYRequestor.prototype._onDeselectAll,
+                diceAdd:               LMRTFYRequestor.prototype._onDiceAdd,
+                bonusAdjust:           LMRTFYRequestor.prototype._onBonusAdjust,
+                clearFormula:          LMRTFYRequestor.prototype._onClearFormula,
+            },
+        };
+    }
 
     static get PARTS() {
         let template;
